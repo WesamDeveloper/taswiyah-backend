@@ -23,7 +23,10 @@ class Customer extends Model
         'clv',
         'risk_score',
         'churn_probability',
-        'next_best_action'
+        'next_best_action',
+        'next_reminder_date',
+        'reminder_frequency_days',
+        'notify_on_debt'
     ];
 
     public function debts()

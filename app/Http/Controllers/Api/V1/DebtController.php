@@ -44,9 +44,9 @@ class DebtController extends Controller
             'notes' => $request->notes
         ]);
 
-        // AUTOMATED WHATSAPP MESSAGE
+        // AUTOMATED WHATSAPP MESSAGE (Only if enabled for this customer)
         $customer = Customer::find($request->customer_id);
-        if ($customer && $customer->primary_phone) {
+        if ($customer && $customer->primary_phone && $customer->notify_on_debt) {
             $message = "مرحباً *{$customer->name}*،\n\n";
             $message .= "تم تسجيل فاتورة دين جديدة على حسابكم.\n";
             $message .= "المبلغ: *{$debt->amount} ر.ي*\n";
