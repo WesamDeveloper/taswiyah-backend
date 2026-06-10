@@ -18,7 +18,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'is_active'
+        'is_active',
+        'is_activated'
     ];
 
     protected $hidden = [
@@ -30,6 +31,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'is_active' => 'boolean',
+        'is_activated' => 'boolean',
     ];
 
     public function tenant()

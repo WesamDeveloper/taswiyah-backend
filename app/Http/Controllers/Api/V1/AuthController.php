@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Tenant;
 use App\Models\Branch;
+use App\Models\ActivationCode;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -44,6 +45,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'admin',
+            'is_activated' => false,
         ]);
 
         // Generate Token
@@ -95,7 +97,57 @@ class AuthController extends Controller
                 'role' => $user->role,
                 'tenant_id' => $user->tenant_id,
                 'branch_id' => $user->branch_id,
+                'is_activated' => $user->is_activated,
             ]
+        ]);
+    }
+
+    /**
+     * Activate the user account using a valid code
+     */
+    public function activate(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string',
+        ]);
+
+        $user = $request->user();
+
+        if ($user->is_activated) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'الحساب مفعل مسبقاً.'
+            ]);
+        }
+
+        $activationCode = ActivationCode::where('code', $request->code)->first();
+
+        if (!$activationCode) {
+            throw ValidationException::withMessages([
+                'code' => ['كود التفعيل غير صحيح.'],
+            ]);
+        }
+
+        if ($activationCode->is_used) {
+            throw ValidationException::withMessages([
+                'code' => ['كود التفعيل هذا مستخدم مسبقاً.'],
+            ]);
+        }
+
+        // Mark code as used
+        $activationCode->update([
+            'is_used' => true,
+            'used_by' => $user->id,
+            'used_at' => now(),
+        ]);
+
+        // Activate user
+        $user->update(['is_activated' => true]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'تم تفعيل الحساب بنجاح.',
+            'user' => $user
         ]);
     }
 
