@@ -32,7 +32,7 @@ class SendMonthlyDebtReminders extends Command
                 $message .= "نود تذكيركم بأن إجمالي الرصيد المتبقي (الديون غير المسددة) حتى نهاية هذا الشهر هو: *{$totalDebt} ر.ي*.\n\n";
                 $message .= "يرجى التكرم بترتيب السداد في أقرب وقت لضمان استمرار تقديم خدماتنا بأفضل جودة.\n\n";
                 $message .= "شكراً لتعاملكم المستمر معنا! 🌟\n";
-                $message .= "_(رسالة آلية من نظام Taswiyah AI)_";
+                $message .= "_(رسالة آلية من نظام Taswiyah)_";
 
                 // Send via Free Node.js Gateway
                 $success = $whatsAppService->sendMessage($customer->primary_phone, $message);
