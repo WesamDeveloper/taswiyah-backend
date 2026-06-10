@@ -83,6 +83,8 @@ class DashboardController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => [
+                'user_name' => $request->user()->name,
+                'company_name' => $request->user()->tenant->name,
                 'total_debts' => $totalDebts,
                 'total_collected' => $totalCollected,
                 'remaining_balance' => $remainingBalance,
