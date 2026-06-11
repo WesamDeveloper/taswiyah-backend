@@ -85,6 +85,7 @@ class DashboardController extends Controller
             'data' => [
                 'user_name' => $request->user()->name,
                 'company_name' => $request->user()->tenant->name,
+                'avatar_icon' => $request->user()->avatar_icon,
                 'total_debts' => $totalDebts,
                 'total_collected' => $totalCollected,
                 'remaining_balance' => $remainingBalance,

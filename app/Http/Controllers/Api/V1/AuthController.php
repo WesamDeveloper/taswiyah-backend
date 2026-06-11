@@ -195,15 +195,20 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'nullable|string|max:255',
-            'whatsapp_number' => 'nullable|string|max:50',
             'avatar_icon' => 'nullable|string|max:50',
-            'password' => 'nullable|string|min:6'
+            'password' => 'nullable|string|min:6',
+            'current_password' => 'required_with:password|string'
         ]);
 
         $user = $request->user();
-        $data = $request->only(['name', 'whatsapp_number', 'avatar_icon']);
+        $data = $request->only(['name', 'avatar_icon']);
 
         if ($request->filled('password')) {
+            if (!Hash::check($request->current_password, $user->password)) {
+                throw ValidationException::withMessages([
+                    'current_password' => ['كلمة المرور الحالية غير صحيحة.']
+                ]);
+            }
             $data['password'] = Hash::make($request->password);
         }
 
@@ -228,12 +233,30 @@ class AuthController extends Controller
             throw ValidationException::withMessages(['email' => ['هذا البريد الإلكتروني غير مسجل لدينا.']]);
         }
 
-        if (!$user->whatsapp_number) {
+        // Get WhatsApp Gateway Status for this user's tenant
+        $statusData = $whatsAppService->getStatus((string)$user->tenant_id);
+        
+        if (!isset($statusData['status']) || $statusData['status'] !== 'connected') {
             return response()->json([
                 'status' => 'error',
                 'needs_support' => true,
-                'message' => 'لم تقم بربط رقم واتساب بحسابك مسبقاً. يرجى التواصل مع خدمة العملاء.'
+                'message' => 'بوابة الواتساب غير متصلة. يرجى تسجيل الدخول وإعادة ربط الواتساب أولاً، أو التواصل مع الدعم الفني.'
             ], 400);
+        }
+
+        $ownPhone = null;
+        if (isset($statusData['user']['id'])) {
+            $ownPhone = explode(':', $statusData['user']['id'])[0];
+            $ownPhone = explode('@', $ownPhone)[0];
+        } elseif (isset($statusData['phone'])) {
+            $ownPhone = $statusData['phone'];
+        }
+
+        if (!$ownPhone) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'لم نتمكن من جلب رقم الواتساب المرتبط بالبوابة.'
+            ], 500);
         }
 
         // Generate 6 digit OTP
@@ -247,12 +270,12 @@ class AuthController extends Controller
 
         $message = "🔐 *إعادة تعيين كلمة المرور*\n\nمرحباً {$user->name}،\nرمز التحقق الخاص بك هو: *{$code}*\n\nالرمز صالح لمدة 10 دقائق. لا تشاركه مع أحد.";
         
-        $success = $whatsAppService->sendMessage((string)$user->tenant_id, $user->whatsapp_number, $message);
+        $success = $whatsAppService->sendMessage((string)$user->tenant_id, $ownPhone, $message);
 
         if ($success) {
             return response()->json([
                 'status' => 'success',
-                'message' => 'تم إرسال رمز التحقق إلى رقم الواتساب الخاص بك.'
+                'message' => 'تم إرسال رمز التحقق إلى رقم الواتساب المرتبط بحسابك داخل بوابة الواتساب.'
             ]);
         }
 
