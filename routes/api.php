@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\BranchController;
 use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\WhatsAppController;
 use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\SyncController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,8 +36,9 @@ Route::prefix('v1')->group(function () {
         Route::post('/auth/settings', [AuthController::class, 'updateSettings']);
         Route::post('/auth/activate', [AuthController::class, 'activate']);
         
-        // Dashboard Stats
+        // Dashboard Stats & Sync
         Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+        Route::get('/sync/initial', [SyncController::class, 'initial']);
         
         // Multi-Tenant / Branch Management
         Route::apiResource('branches', BranchController::class);
