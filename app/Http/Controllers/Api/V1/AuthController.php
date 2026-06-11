@@ -236,7 +236,10 @@ class AuthController extends Controller
         // Get WhatsApp Gateway Status for this user's tenant
         $statusData = $whatsAppService->getStatus((string)$user->tenant_id);
         
-        if (!isset($statusData['status']) || $statusData['status'] !== 'connected') {
+        $isConnected = (isset($statusData['status']) && $statusData['status'] === 'connected') || 
+                       (isset($statusData['connected']) && $statusData['connected'] == true);
+
+        if (!$isConnected) {
             return response()->json([
                 'status' => 'error',
                 'needs_support' => true,
