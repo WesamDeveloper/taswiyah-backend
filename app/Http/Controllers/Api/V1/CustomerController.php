@@ -151,6 +151,27 @@ class CustomerController extends Controller
     public function remind(Request $request, $id, WhatsAppService $whatsapp)
     {
         $tenantId = $request->user()->tenant_id;
+        
+        // Allow frontend to pass the latest calculated values directly
+        $remaining = $request->input('remaining');
+        $phone = $request->input('phone');
+        $name = $request->input('name');
+        
+        if ($remaining && $phone && $name) {
+            if ($remaining > 0) {
+                $message = "📄 *تذكير رصيد مستحق*\n\nمرحباً {$name}،\nنود تذكيركم بأن الرصيد المتبقي المستحق عليكم هو: *{$remaining} ر.ي*.\nيرجى السداد في أقرب وقت. شكراً لتعاملكم معنا!";
+                $success = $whatsapp->sendMessage((string)$tenantId, $phone, $message);
+                
+                if ($success) {
+                    return response()->json(['status' => 'success', 'message' => 'تم إرسال التذكير بنجاح']);
+                } else {
+                    return response()->json(['status' => 'error', 'message' => 'فشل الإرسال! تأكد من: 1. ربط الواتساب من قسم (المزيد) 2. أن رقم العميل يبدأ بالرمز الدولي (مثل 966 أو 967)'], 400);
+                }
+            }
+            return response()->json(['status' => 'error', 'message' => 'ليس عليه ديون متبقية'], 400);
+        }
+
+        // Fallback to database if frontend didn't pass data (e.g. old clients)
         $customer = Customer::where('tenant_id', $tenantId)->with('debts')->findOrFail($id);
         
         $totalDebt = $customer->debts->sum('amount');
