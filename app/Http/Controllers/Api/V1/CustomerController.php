@@ -34,6 +34,22 @@ class CustomerController extends Controller
             'primary_phone' => 'required|string|max:20',
         ]);
 
+        $tenantId = $request->user()->tenant_id;
+
+        // Check for duplicates
+        $exists = Customer::where('tenant_id', $tenantId)
+            ->where(function ($query) use ($request) {
+                $query->where('name', $request->name)
+                      ->orWhere('primary_phone', $request->primary_phone);
+            })->exists();
+
+        if ($exists) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'يوجد عميل مسجل مسبقاً بنفس الاسم أو رقم الهاتف.'
+            ], 422);
+        }
+
         $customer = Customer::create([
             'tenant_id' => $request->user()->tenant_id,
             'branch_id' => $request->user()->branch_id,
@@ -76,9 +92,14 @@ class CustomerController extends Controller
     {
         $tenantId = $request->user()->tenant_id;
         $customer = Customer::where('tenant_id', $tenantId)->findOrFail($id);
+        
+        // Delete all debts and payments associated with this customer
+        // Assuming models are Debt and Payment, though cascade usually handles it.
+        $customer->debts()->delete();
+        
         $customer->delete();
         
-        return response()->json(['status' => 'success', 'message' => 'Customer deleted']);
+        return response()->json(['status' => 'success', 'message' => 'تم حذف العميل بنجاح']);
     }
 
     public function payBalance(Request $request, $id)
