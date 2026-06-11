@@ -67,7 +67,10 @@ class CustomerController extends Controller
     {
         $tenantId = $request->user()->tenant_id;
         $customer = Customer::where('tenant_id', $tenantId)
-            ->with(['debts' => function($q) { $q->orderBy('created_at', 'desc'); }])
+            ->with([
+                'debts' => function($q) { $q->orderBy('created_at', 'desc'); },
+                'payments' => function($q) { $q->orderBy('created_at', 'desc'); }
+            ])
             ->findOrFail($id);
             
         return response()->json(['status' => 'success', 'data' => $customer]);
