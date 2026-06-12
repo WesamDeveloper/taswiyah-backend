@@ -21,7 +21,7 @@ class WhatsAppService
     public function initSession(string $tenantId)
     {
         try {
-            $response = Http::timeout(10)->post("{$this->gatewayUrl}/wa/api/whatsapp/init", [
+            $response = Http::timeout(10)->post("{$this->gatewayUrl}/api/whatsapp/init", [
                 'tenant_id' => $tenantId
             ]);
             return $response->json();
@@ -36,7 +36,7 @@ class WhatsAppService
     public function getStatus(string $tenantId)
     {
         try {
-            $response = Http::timeout(5)->get("{$this->gatewayUrl}/wa/api/whatsapp/status/{$tenantId}");
+            $response = Http::timeout(5)->get("{$this->gatewayUrl}/api/whatsapp/status/{$tenantId}");
             return $response->json();
         } catch (\Exception $e) {
             return ['error' => 'Gateway Unreachable'];
@@ -49,7 +49,7 @@ class WhatsAppService
     public function resetSession(string $tenantId)
     {
         try {
-            $response = Http::timeout(10)->post("{$this->gatewayUrl}/wa/api/whatsapp/reset", [
+            $response = Http::timeout(10)->post("{$this->gatewayUrl}/api/whatsapp/reset", [
                 'tenant_id' => $tenantId
             ]);
             return $response->json();
@@ -64,7 +64,7 @@ class WhatsAppService
     public function sendMessage(string $tenantId, string $phone, string $message): bool
     {
         try {
-            $response = Http::post("{$this->gatewayUrl}/wa/api/send-message", [
+            $response = Http::post("{$this->gatewayUrl}/api/send-message", [
                 'tenant_id' => $tenantId,
                 'phone' => $phone,
                 'message' => $message,
