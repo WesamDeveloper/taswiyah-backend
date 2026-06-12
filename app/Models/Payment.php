@@ -18,4 +18,9 @@ class Payment extends Model
         'method',
         'receipt_url',
     ];
+
+    public function debt()
+    {
+        return $this->belongsTo(Debt::class);
+    }
 }
