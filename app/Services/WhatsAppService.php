@@ -63,10 +63,18 @@ class WhatsAppService
      */
     public function sendMessage(string $tenantId, string $phone, string $message): array
     {
+        // Format phone to international format if it starts with 7 and is 9 digits long (Yemen)
+        $formattedPhone = preg_replace('/^\D+/', '', $phone);
+        if (strlen($formattedPhone) == 9 && str_starts_with($formattedPhone, '7')) {
+            $formattedPhone = '967' . $formattedPhone;
+        } elseif (strlen($formattedPhone) == 10 && str_starts_with($formattedPhone, '05')) { // Saudi
+            $formattedPhone = '966' . substr($formattedPhone, 1);
+        }
+
         try {
             $response = Http::post("{$this->gatewayUrl}/api/send-message", [
                 'tenant_id' => $tenantId,
-                'phone' => $phone,
+                'phone' => $formattedPhone,
                 'message' => $message,
             ]);
 

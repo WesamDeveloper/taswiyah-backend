@@ -35,9 +35,9 @@ class SendMonthlyDebtReminders extends Command
                 $message .= "_(رسالة آلية من نظام Taswiyah)_";
 
                 // Send via Free Node.js Gateway
-                $success = $whatsAppService->sendMessage($customer->primary_phone, $message);
+                $result = $whatsAppService->sendMessage((string)$customer->tenant_id, $customer->primary_phone, $message);
 
-                if ($success) {
+                if ($result['success']) {
                     $count++;
                     $this->info("Sent to {$customer->name} ({$customer->primary_phone})");
                 }

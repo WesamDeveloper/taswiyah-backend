@@ -158,17 +158,9 @@ class CustomerController extends Controller
         $name = $request->input('name');
         
         if ($remaining && $phone && $name) {
-            // Format phone to international format if it starts with 7 and is 9 digits long (Yemen)
-            $formattedPhone = preg_replace('/^\D+/', '', $phone);
-            if (strlen($formattedPhone) == 9 && str_starts_with($formattedPhone, '7')) {
-                $formattedPhone = '967' . $formattedPhone;
-            } elseif (strlen($formattedPhone) == 10 && str_starts_with($formattedPhone, '05')) { // Saudi
-                $formattedPhone = '966' . substr($formattedPhone, 1);
-            }
-
             if ($remaining > 0) {
                 $message = "📄 *تذكير رصيد مستحق*\n\nمرحباً {$name}،\nنود تذكيركم بأن الرصيد المتبقي المستحق عليكم هو: *{$remaining} ر.ي*.\nيرجى السداد في أقرب وقت. شكراً لتعاملكم معنا!";
-                $result = $whatsapp->sendMessage((string)$tenantId, $formattedPhone, $message);
+                $result = $whatsapp->sendMessage((string)$tenantId, $phone, $message);
                 
                 if ($result['success']) {
                     return response()->json(['status' => 'success', 'message' => 'تم إرسال التذكير بنجاح']);
@@ -187,16 +179,9 @@ class CustomerController extends Controller
         $remaining = $totalDebt - $totalPaid;
         
         if ($remaining > 0) {
-            $formattedPhoneFallback = preg_replace('/^\D+/', '', $customer->primary_phone);
-            if (strlen($formattedPhoneFallback) == 9 && str_starts_with($formattedPhoneFallback, '7')) {
-                $formattedPhoneFallback = '967' . $formattedPhoneFallback;
-            } elseif (strlen($formattedPhoneFallback) == 10 && str_starts_with($formattedPhoneFallback, '05')) {
-                $formattedPhoneFallback = '966' . substr($formattedPhoneFallback, 1);
-            }
-
             $message = "📄 *تذكير رصيد مستحق*\n\nمرحباً {$customer->name}،\nنود تذكيركم بأن الرصيد المتبقي المستحق عليكم هو: *{$remaining} ر.ي*.\nيرجى السداد في أقرب وقت. شكراً لتعاملكم معنا!";
             
-            $result = $whatsapp->sendMessage((string)$tenantId, $formattedPhoneFallback, $message);
+            $result = $whatsapp->sendMessage((string)$tenantId, $customer->primary_phone, $message);
             
             if ($result['success']) {
                 return response()->json(['status' => 'success', 'message' => 'تم إرسال التذكير بنجاح']);

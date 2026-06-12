@@ -55,12 +55,12 @@ class WhatsAppController extends Controller
         $customer = Customer::findOrFail($request->customer_id);
         $tenantId = $request->user()->tenant_id;
 
-        $success = $whatsAppService->sendMessage((string)$tenantId, $customer->primary_phone, $request->message);
+        $result = $whatsAppService->sendMessage((string)$tenantId, $customer->primary_phone, $request->message);
 
-        if ($success) {
+        if ($result['success']) {
             return response()->json(['status' => 'success', 'message' => 'تم إرسال رسالة الواتساب بنجاح.']);
         }
 
-        return response()->json(['status' => 'error', 'message' => 'تعذر إرسال الرسالة، تأكد من ربط الواتساب في الإعدادات.'], 500);
+        return response()->json(['status' => 'error', 'message' => 'تعذر إرسال الرسالة: ' . $result['error']], 500);
     }
 }

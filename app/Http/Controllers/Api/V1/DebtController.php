@@ -56,7 +56,10 @@ class DebtController extends Controller
             $message .= "\nشكراً لتعاملكم معنا! (تطبيق تسوية)";
 
             // Fire and forget via service
-            $whatsapp->sendMessage((string)$tenantId, $customer->primary_phone, $message);
+            $result = $whatsapp->sendMessage((string)$tenantId, $customer->primary_phone, $message);
+            if (!$result['success']) {
+                Log::warning("Failed to auto-notify customer {$customer->id} on debt addition: " . $result['error']);
+            }
         }
 
         return response()->json(['status' => 'success', 'data' => $debt], 201);
