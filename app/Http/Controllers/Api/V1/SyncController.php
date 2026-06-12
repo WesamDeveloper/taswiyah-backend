@@ -35,8 +35,8 @@ class SyncController extends Controller
             ->get()
             ->map(function ($payment) {
                 $paymentArray = $payment->toArray();
-                $paymentArray['customer_id'] = $payment->debt->customer->id ?? null;
-                $paymentArray['customer_name'] = $payment->debt->customer->name ?? 'غير محدد';
+                $paymentArray['customer_id'] = $payment->debt?->customer?->id ?? null;
+                $paymentArray['customer_name'] = $payment->debt?->customer?->name ?? 'غير محدد';
                 unset($paymentArray['debt']);
                 return $paymentArray;
             });
