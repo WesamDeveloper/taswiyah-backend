@@ -168,12 +168,12 @@ class CustomerController extends Controller
 
             if ($remaining > 0) {
                 $message = "📄 *تذكير رصيد مستحق*\n\nمرحباً {$name}،\nنود تذكيركم بأن الرصيد المتبقي المستحق عليكم هو: *{$remaining} ر.ي*.\nيرجى السداد في أقرب وقت. شكراً لتعاملكم معنا!";
-                $success = $whatsapp->sendMessage((string)$tenantId, $formattedPhone, $message);
+                $result = $whatsapp->sendMessage((string)$tenantId, $formattedPhone, $message);
                 
-                if ($success) {
+                if ($result['success']) {
                     return response()->json(['status' => 'success', 'message' => 'تم إرسال التذكير بنجاح']);
                 } else {
-                    return response()->json(['status' => 'error', 'message' => 'فشل الإرسال! تأكد من: 1. ربط الواتساب من قسم (المزيد) 2. أن رقم العميل يبدأ بالرمز الدولي (مثل 966 أو 967)'], 400);
+                    return response()->json(['status' => 'error', 'message' => 'فشل الإرسال: ' . $result['error']], 400);
                 }
             }
             return response()->json(['status' => 'error', 'message' => 'ليس عليه ديون متبقية'], 400);
@@ -196,12 +196,12 @@ class CustomerController extends Controller
 
             $message = "📄 *تذكير رصيد مستحق*\n\nمرحباً {$customer->name}،\nنود تذكيركم بأن الرصيد المتبقي المستحق عليكم هو: *{$remaining} ر.ي*.\nيرجى السداد في أقرب وقت. شكراً لتعاملكم معنا!";
             
-            $success = $whatsapp->sendMessage((string)$tenantId, $formattedPhoneFallback, $message);
+            $result = $whatsapp->sendMessage((string)$tenantId, $formattedPhoneFallback, $message);
             
-            if ($success) {
+            if ($result['success']) {
                 return response()->json(['status' => 'success', 'message' => 'تم إرسال التذكير بنجاح']);
             } else {
-                return response()->json(['status' => 'error', 'message' => 'فشل الإرسال! تأكد من: 1. ربط الواتساب من قسم (المزيد) 2. أن رقم العميل يبدأ بالرمز الدولي (مثل 966 أو 967)'], 400);
+                return response()->json(['status' => 'error', 'message' => 'فشل الإرسال: ' . $result['error']], 400);
             }
         }
         return response()->json(['status' => 'error', 'message' => 'ليس عليه ديون متبقية'], 400);

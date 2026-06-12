@@ -61,7 +61,7 @@ class WhatsAppService
     /**
      * Send WhatsApp message using the specific tenant's session
      */
-    public function sendMessage(string $tenantId, string $phone, string $message): bool
+    public function sendMessage(string $tenantId, string $phone, string $message): array
     {
         try {
             $response = Http::post("{$this->gatewayUrl}/api/send-message", [
@@ -71,14 +71,19 @@ class WhatsAppService
             ]);
 
             if ($response->successful()) {
-                return true;
+                return ['success' => true, 'error' => null];
             }
 
-            Log::error('WhatsApp Gateway Error: ' . $response->body());
-            return false;
+            $errorData = $response->json();
+            $errorMsg = $errorData['error'] ?? $response->body();
+            if (isset($errorData['details'])) {
+                $errorMsg .= " (" . $errorData['details'] . ")";
+            }
+            Log::error('WhatsApp Gateway Error: ' . $errorMsg);
+            return ['success' => false, 'error' => "Gateway Error: " . $errorMsg];
         } catch (\Exception $e) {
             Log::error('WhatsApp Service Exception: ' . $e->getMessage());
-            return false;
+            return ['success' => false, 'error' => "Service Exception: " . $e->getMessage()];
         }
     }
 }
