@@ -32,6 +32,17 @@ class WhatsAppController extends Controller
     }
 
     /**
+     * Reset WhatsApp session
+     */
+    public function resetSession(Request $request, WhatsAppService $whatsAppService)
+    {
+        $tenantId = $request->user()->tenant_id;
+        $response = $whatsAppService->resetSession((string)$tenantId);
+        
+        return response()->json($response);
+    }
+
+    /**
      * Manual WhatsApp messaging endpoint
      */
     public function sendManualMessage(Request $request, WhatsAppService $whatsAppService)

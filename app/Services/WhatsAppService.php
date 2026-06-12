@@ -44,6 +44,21 @@ class WhatsAppService
     }
 
     /**
+     * Reset the tenant's session
+     */
+    public function resetSession(string $tenantId)
+    {
+        try {
+            $response = Http::timeout(10)->post("{$this->gatewayUrl}/wa/api/whatsapp/reset", [
+                'tenant_id' => $tenantId
+            ]);
+            return $response->json();
+        } catch (\Exception $e) {
+            return ['error' => 'Gateway Unreachable'];
+        }
+    }
+
+    /**
      * Send WhatsApp message using the specific tenant's session
      */
     public function sendMessage(string $tenantId, string $phone, string $message): bool

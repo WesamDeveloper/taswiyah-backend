@@ -56,9 +56,10 @@ Route::prefix('v1')->group(function () {
         // Invoices & Financials
         Route::apiResource('invoices', InvoiceController::class);
         
-        // WhatsApp Integration (Multi-Tenant QR and Messaging)
+        // WhatsApp Integration
         Route::get('/whatsapp/qr', [WhatsAppController::class, 'getQrCode']);
         Route::get('/whatsapp/status', [WhatsAppController::class, 'getStatus']);
+        Route::post('/whatsapp/reset', [WhatsAppController::class, 'resetSession']);
         Route::post('/whatsapp/send', [WhatsAppController::class, 'sendManualMessage']);
         
     });
