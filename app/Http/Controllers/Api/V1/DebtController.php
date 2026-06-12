@@ -50,6 +50,9 @@ class DebtController extends Controller
             $message = "مرحباً *{$customer->name}*،\n\n";
             $message .= "تم تسجيل فاتورة دين جديدة على حسابكم.\n";
             $message .= "المبلغ: *{$debt->amount} ر.ي*\n";
+            if ($debt->notes) {
+                $message .= "البيان/الملاحظات: {$debt->notes}\n";
+            }
             if ($debt->due_date) {
                 $message .= "تاريخ الاستحقاق: {$debt->due_date->format('Y-m-d')}\n";
             }

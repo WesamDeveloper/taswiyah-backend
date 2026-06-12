@@ -144,6 +144,23 @@ class CustomerController extends Controller
                 $amountToPay = 0;
             }
         }
+        if ($customer->notify_on_debt && $customer->primary_phone) {
+            $whatsapp = app(\App\Services\WhatsAppService::class);
+            $totalDebt = $customer->debts()->sum('amount');
+            $totalPaid = $customer->debts()->sum('paid');
+            $remaining = $totalDebt - $totalPaid;
+            
+            $message = "مرحباً *{$customer->name}*،\n\n";
+            $message .= "تم استلام دفعة مالية لحسابكم بنجاح.\n";
+            $message .= "المبلغ المحصل: *{$request->amount} ر.ي*\n";
+            $message .= "الرصيد المتبقي عليكم: *{$remaining} ر.ي*\n\n";
+            $message .= "شكراً لتعاملكم معنا! (تطبيق تسوية)";
+
+            $result = $whatsapp->sendMessage((string)$tenantId, $customer->primary_phone, $message);
+            if (!$result['success']) {
+                \Illuminate\Support\Facades\Log::warning("Failed to auto-notify customer {$customer->id} on payment: " . $result['error']);
+            }
+        }
         
         return response()->json(['status' => 'success', 'message' => 'Payment applied']);
     }
