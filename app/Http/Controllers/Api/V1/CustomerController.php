@@ -83,8 +83,8 @@ class CustomerController extends Controller
         $tenantId = $request->user()->tenant_id;
         $customer = Customer::where('tenant_id', $tenantId)->findOrFail($id);
         
-        $data = $request->only(['name', 'primary_phone', 'address', 'email', 'reminder_frequency_days', 'notify_on_debt']);
-        if ($request->has('reminder_frequency_days')) {
+        $data = $request->only(['name', 'primary_phone', 'address', 'email', 'reminder_frequency_days', 'notify_on_debt', 'next_reminder_date']);
+        if ($request->has('reminder_frequency_days') && !$request->has('next_reminder_date')) {
             $data['next_reminder_date'] = $request->reminder_frequency_days ? \Carbon\Carbon::now()->addDays($request->reminder_frequency_days) : null;
         }
 
