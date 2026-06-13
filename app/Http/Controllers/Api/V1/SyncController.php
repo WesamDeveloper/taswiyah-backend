@@ -14,7 +14,15 @@ class SyncController extends Controller
     {
         $tenantId = $request->user()->tenant_id;
 
-        $customers = Customer::where('tenant_id', $tenantId)->get();
+        $customers = Customer::where('tenant_id', $tenantId)
+            ->withSum('debts as total_debt', 'amount')
+            ->withSum('debts as total_paid', 'paid')
+            ->get()
+            ->map(function ($customer) {
+                $customerArray = $customer->toArray();
+                $customerArray['remaining_balance'] = ($customer->total_debt ?? 0) - ($customer->total_paid ?? 0);
+                return $customerArray;
+            });
         
         $debts = Debt::where('tenant_id', $tenantId)
             ->with(['customer' => function($q) {
@@ -23,7 +31,7 @@ class SyncController extends Controller
             ->get()
             ->map(function ($debt) {
                 $debtArray = $debt->toArray();
-                $debtArray['customer_name'] = $debt->customer->name ?? 'غير محدد';
+                $debtArray['customer_name'] = $debt->customer?->name ?? 'غير محدد';
                 unset($debtArray['customer']);
                 return $debtArray;
             });
@@ -44,9 +52,9 @@ class SyncController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => [
-                'customers' => $customers,
-                'debts' => $debts,
-                'payments' => $payments
+                'customers' => $customers->values(),
+                'debts' => $debts->values(),
+                'payments' => $payments->values()
             ]
         ]);
     }

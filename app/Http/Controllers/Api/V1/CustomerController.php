@@ -20,8 +20,10 @@ class CustomerController extends Controller
             ->get();
             
         // Append calculated balance to avoid doing it on mobile
-        $customers->each(function($customer) {
-            $customer->remaining_balance = ($customer->total_debt ?? 0) - ($customer->total_paid ?? 0);
+        $customers = $customers->map(function($customer) {
+            $customerArray = $customer->toArray();
+            $customerArray['remaining_balance'] = ($customer->total_debt ?? 0) - ($customer->total_paid ?? 0);
+            return $customerArray;
         });
 
         return response()->json(['status' => 'success', 'data' => $customers]);
